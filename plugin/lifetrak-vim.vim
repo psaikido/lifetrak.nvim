@@ -1,6 +1,8 @@
 "Boilerplate for a new journal entry
 au BufNewFile,BufRead *.lft set filetype=lft
 
+let s:metas = ['energy', 'pain', 'mood', 'sleep']
+
 augroup lifetrak_settings " {
 	autocmd!
 	autocmd FileType lft :set linebreak
@@ -25,22 +27,34 @@ function! s:JournalEntry() abort
     "First find the last one and yank it into register '0'.
     "Once found, increment and save it to insert later.
     normal! gg0jjwww"0yiW
-    let lastId = @0
     let nextId = @0 + 1
 
     normal! ggO
     normal! O
     normal! O
     normal! O
-    call append(0, "---")
-    call append(1, '# ' . strftime('%Y-%m-%d'))
-    call append(2, '- id: ' . nextId)
-    call append(3, '- energy: ')
-    call append(4, '- pain: ')
-    call append(5, '- mood: ')
-    call append(6, '- sleep: ')
-    call append(7, '- tags: ')
-    call append(8, '')
+
+    let hdrDelim = '---'
+    let hdrDate =  '# ' . strftime('%Y-%m-%d')
+    let hdrId =    '# id: ' . nextId
+    let lstTop = [hdrDelim, hdrDate, hdrId]
+
+    let lstMeta = s:DoMeta()
+
+    let hdrList = lstTop + lstMeta
+    call append(0, hdrList)
+endfunction
+
+function s:DoMeta() abort
+    let formattedMetas = []
+
+    for m in s:metas
+        let strMeta = '- ' . m . ': '
+        call add(formattedMetas, strMeta)
+    endfor
+
+    call add(formattedMetas, '- tags: ')
+    return formattedMetas 
 endfunction
 
 "Filter by tag, output to new split

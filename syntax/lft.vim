@@ -15,6 +15,7 @@ set syntax=lft
 "Top two lines hilighted
 syn match journalEntryTop /^--.*/
 syn match journalEntryTop /^#.*/
+syn match journalEntryTop /^\s.*id:\s.*/
 hi def link journalEntryTop Special
 
 "Hyphenated list of meta data (keys: values) in commented colour.
