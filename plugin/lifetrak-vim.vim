@@ -1,6 +1,25 @@
 "Boilerplate for a new journal entry
 au BufNewFile,BufRead *.lft set filetype=lft
 
+augroup lifetrak_settings " {
+	autocmd!
+	autocmd FileType lft :set linebreak
+	autocmd FileType lft :set nohls
+	autocmd FileType lft :set nospell
+    autocmd FileType lft nmap <Leader>je :call <SID>JournalEntry()<cr>
+    autocmd FileType lft nmap <Leader>jt :call <SID>ChooseATag()<cr>
+	autocmd FileType lft nnoremap <Leader>jd :call <SID>ViewDown()<cr>
+	autocmd FileType lft nnoremap <Leader>ju :call <SID>ViewUp()<cr>
+augroup END " }
+
+function! s:ViewDown() abort
+    execute "normal! /^---$\rzt:nohlsearch\r"
+endfunction
+
+function! s:ViewUp() abort
+    execute "normal! ?^---$\rzt:nohlsearch\r"
+endfunction
+
 function! s:JournalEntry() abort
     "Increment the id.
     "First find the last one and yank it into register '0'.
