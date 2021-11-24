@@ -1,8 +1,6 @@
 "Boilerplate for a new journal entry
 au BufNewFile,BufRead *.lft set filetype=lft
 
-let s:metas = ['energy', 'pain', 'mood', 'sleep']
-
 augroup lifetrak_settings " {
 	autocmd!
 	autocmd FileType lft :set linebreak
@@ -12,6 +10,7 @@ augroup lifetrak_settings " {
     autocmd FileType lft nmap <Leader>jt :call <SID>ChooseATag()<cr>
 	autocmd FileType lft nnoremap <Leader>jd :call <SID>ViewDown()<cr>
 	autocmd FileType lft nnoremap <Leader>ju :call <SID>ViewUp()<cr>
+    autocmd FileType lft let b:coc_suggest_disable = 1
 augroup END " }
 
 function! s:ViewDown() abort
@@ -48,7 +47,7 @@ endfunction
 function s:DoMeta() abort
     let formattedMetas = []
 
-    for m in s:metas
+    for m in g:lifetrak_metas
         let strMeta = '- ' . m . ': '
         call add(formattedMetas, strMeta)
     endfor
