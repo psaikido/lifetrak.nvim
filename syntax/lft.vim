@@ -16,7 +16,7 @@ set syntax=lft
 syn match journalEntryTop /^--.*/
 syn match journalEntryTop /^#.*/
 syn match journalEntryTop /^\s.*id:\s.*/
-hi def link journalEntryTop Statement
+hi def link journalEntryTop Identifier
 
 "Hyphenated list of meta data (keys: values) in commented colour.
 syn match journalEntryMeta /^-\s\w*:\s.*/
@@ -24,4 +24,4 @@ hi def link journalEntryMeta Comment
 
 "Tags item blue if populated.
 syn match journalEntryTags /-\stags:\s\w.*/
-hi def link journalEntryTags Identifier 
+hi def link journalEntryTags Type 
