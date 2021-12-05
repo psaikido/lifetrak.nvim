@@ -34,7 +34,7 @@ function! s:JournalEntry() abort
     normal! O
 
     let hdrDelim = '---'
-    let hdrDate =  '# ' . strftime('%Y-%m-%d')
+    let hdrDate =  '# ' . strftime('%Y-%m-%d %a')
     let hdrId =    '# id: ' . nextId
     let lstTop = [hdrDelim, hdrDate, hdrId]
 
