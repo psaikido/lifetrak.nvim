@@ -22,6 +22,7 @@ hi def link journalEntryTop Special
 syn match journalEntryMeta /^-\s\w*:\s.*/
 hi def link journalEntryMeta Comment 
 
-"Tags item blue if populated.
+"Tags item hilight if populated.
 syn match journalEntryTags /-\stags:\s\w.*/
-hi def link journalEntryTags Statement 
+hi def link journalEntryTags Identifier 
+
