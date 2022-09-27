@@ -26,4 +26,5 @@ hi def link journalEntryMeta Comment
 syn match journalEntryTags /-\stags:\s\w.*/
 hi def link journalEntryTags Identifier 
 
-set columns=80
+set columns=72
+set tw=72
