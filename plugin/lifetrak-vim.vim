@@ -6,20 +6,20 @@ augroup lifetrak_settings " {
 	autocmd FileType lft :set linebreak
 	autocmd FileType lft :set nohls
 	autocmd FileType lft :set nospell
-    autocmd FileType lft nmap <Leader>le :call <SID>JournalEntry()<cr>
-    autocmd FileType lft nmap <Leader>lt :call <SID>ChooseATag()<cr>
-	autocmd FileType lft nnoremap <Leader>ld :call <SID>ViewDown()<cr>
-	autocmd FileType lft nnoremap <Leader>lu :call <SID>ViewUp()<cr>
+    " autocmd FileType lft nmap <Leader>le :call JournalEntry()<cr>
+    " autocmd FileType lft nmap <Leader>lt :call ChooseATag()<cr>
+	" autocmd FileType lft nnoremap <Leader>ld :call ViewDown()<cr>
+	" autocmd FileType lft nnoremap <Leader>lu :call ViewUp()<cr>
     autocmd FileType lft let b:coc_suggest_disable = 1
 augroup END " }
 
-function! s:ViewDown() abort
-    execute "normal! /^---$\rzt:nohlsearch\r"
-endfunction
+" function! s:ViewDown() abort
+"     execute "normal! /^---$\rzt:nohlsearch\r"
+" endfunction
 
-function! s:ViewUp() abort
-    execute "normal! ?^---$\rzt:nohlsearch\r"
-endfunction
+" function! s:ViewUp() abort
+"     execute "normal! ?^---$\rzt:nohlsearch\r"
+" endfunction
 
 function! s:JournalEntry() abort
     "Increment the id.
