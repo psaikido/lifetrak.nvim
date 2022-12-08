@@ -21,40 +21,40 @@ augroup END " }
 "     execute "normal! ?^---$\rzt:nohlsearch\r"
 " endfunction
 
-function! s:JournalEntry() abort
-    "Increment the id.
-    "First find the last one and yank it into register '0'.
-    "Once found, increment and save it to insert later.
-    normal! gg0jjwww"0yiW
-    let nextId = @0 + 1
+"function! s:JournalEntrybk() abort
+"    "Increment the id.
+"    "First find the last one and yank it into register '0'.
+"    "Once found, increment and save it to insert later.
+"    normal! gg0jjwww"0yiW
+"    let nextId = @0 + 1
 
-    normal! ggO
-    normal! O
-    normal! O
-    normal! O
+"    normal! ggO
+"    normal! O
+"    normal! O
+"    normal! O
 
-    let hdrDelim = '---'
-    let hdrDate =  '# ' . strftime('%Y-%m-%d %a')
-    let hdrId =    '# id: ' . nextId
-    let lstTop = [hdrDelim, hdrDate, hdrId]
+"    let hdrDelim = '---'
+"    let hdrDate =  '# ' . strftime('%Y-%m-%d %a')
+"    let hdrId =    '# id: ' . nextId
+"    let lstTop = [hdrDelim, hdrDate, hdrId]
 
-    let lstMeta = s:DoMeta()
+"    let lstMeta = s:DoMeta()
 
-    let hdrList = lstTop + lstMeta
-    call append(0, hdrList)
-endfunction
+"    let hdrList = lstTop + lstMeta
+"    call append(0, hdrList)
+"endfunction
 
-function s:DoMeta() abort
-    let formattedMetas = []
+" function s:DoMeta() abort
+"     let formattedMetas = []
 
-    for m in g:lifetrak_metas
-        let strMeta = '- ' . m . ': '
-        call add(formattedMetas, strMeta)
-    endfor
+"     for m in g:lifetrak_metas
+"         let strMeta = '- ' . m . ': '
+"         call add(formattedMetas, strMeta)
+"     endfor
 
-    call add(formattedMetas, '- tags: ')
-    return formattedMetas 
-endfunction
+"     call add(formattedMetas, '- tags: ')
+"     return formattedMetas 
+" endfunction
 
 "Filter by tag, output to new split
 function! s:JournalFilter(searchTerm) abort
