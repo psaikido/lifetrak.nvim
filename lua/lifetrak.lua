@@ -2,6 +2,7 @@ M = {}
 
 local utils = require('utils')
 
+
 M.journal_entry = function()
     local header = M._make_header()
 
@@ -77,30 +78,99 @@ end
 
 M.choose_tag = function()
     local tags = M.get_tags()
-    local tag_prompts = 'Choose a tag: '
-    tag_prompts = tag_prompts .. vim.inspect(tags) .. ': '
+    local tag_prompts = 'Choose a tag: ' .. vim.inspect(tags) .. ': '
     vim.ui.input({ prompt = tag_prompts }, function(input)
         M._filter_by_tag(input)
     end)
 end
 
+
 M._filter_by_tag = function(tag)
+    local chosen_tags = {}
+
+    for k, v in pairs(M._get_whole_buffer()) do
+        if (string.match(v, '- tags:') and string.match(v, tag)) then
+            table.insert(chosen_tags, {k, v})
+        end
+    end
+
+    local output = M._build_output(chosen_tags)
+end
+
+
+M._build_output = function(tags)
+    local entries = {}
+
+    for k, v in pairs(tags) do
+        local entry = M._get_entry(v[1])
+        table.insert(entries, entry)
+    end
+
+    -- utils.insp(entries)
+    M._output(entries)
+end
+
+
+M._get_entry = function(entry_line_no)
+    utils.insp(entry_line_no)
+    local entry = {}
+    -- we have a line number of the tag being searched
+    -- it's 7 below the starting '---'
+    local line_no_top = entry_line_no - 8
+
+    -- go through each line looking for the next entry start ie. '---'
+    -- which signals the start of the next entry
+    local next_entry_found = false 
+    
+    while next_entry_found == false do
+        local line = vim.api.nvim_buf_get_lines(0, line_no_top, line_no_top + 1, false)
+        line_no_top = line_no_top + 1
+
+        -- make sure we don't go off the end of the list
+        -- if (line_no_top >= vim.api.nvim_buf_line_count(0)) then
+        --     break
+        -- end
+
+        if ((line[1] == '---') and (line_no_top > entry_line_no + 2)) then
+            next_entry_found = true
+        else
+            table.insert(entry, line)
+        end
+    end
+
+    return entry
+end
+
+
+M._output = function(entries)
+    vim.api.nvim_command('tabnew') -- We open a new vertical window at the far right
+    buf = vim.api.nvim_get_current_buf() -- ...and it's buffer handle.
+    vim.api.nvim_buf_set_name(buf, 'Journal filter #' .. buf)
+    vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
+    vim.api.nvim_buf_set_option(buf, 'swapfile', false)
+    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
+    vim.api.nvim_buf_set_option(buf, 'filetype', 'lft')
+
+    local count = 0
+    for _, v in pairs(entries) do
+        for _, y in pairs(v) do
+            vim.api.nvim_buf_set_lines(buf, count, count, false, y)
+            count = count + 1
+        end
+    end
 end
 
 
 M.get_tags = function()
-    local line_count = vim.api.nvim_buf_line_count(0)
-    line_count = line_count - 1 -- get_text is 0 based
-    local lines = vim.api.nvim_buf_get_text(0, 0, 0, line_count, 0, {})
-
     local all_tags = {}
 
-    for k, v in pairs(lines) do
+    for k, v in pairs(M._get_whole_buffer()) do
         if (string.match(v, '- tags:') and string.len(v) > 8) then
             -- remove the '- tags: ' prefix
             local tag = string.sub(v, 9)
 
-            -- split up multiple tags
+            -- add to the result
+            -- split up multiple tags if there are any
             if (string.find(tag, ',') ~= nil) then
                 for y in string.gmatch(tag, "%a+") do
                     M._add_unique(all_tags, y)
@@ -113,6 +183,12 @@ M.get_tags = function()
 
     return all_tags
 end
+
+
+M._get_whole_buffer = function()
+    return vim.api.nvim_buf_get_lines(0, 0, -1, {})
+end
+
 
 M._add_unique = function(things, thing)
     if (M._is_unique(things, thing)) then
@@ -130,5 +206,7 @@ M._is_unique = function(things, thing)
     return true
 end
 
+journal_text = M._get_whole_buffer()
+-- utils.insp(journal_text)
 
 return M
