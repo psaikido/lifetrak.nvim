@@ -21,3 +21,12 @@ The following mappings are set in an autocmd block in the main source code.
 
 ## Tags
 vim.opts.lifetrak_metas = {'energy', 'pain', 'mood', 'sleep'}
+
+
+## Todo
+- Add plenary testing
+- Set up an install with a default journal file
+- Allow user to configure the journal file and path
+- Use some sort of storage to get latest entry id
+- Storage could keep stats to display
+- Consider building encryption in
