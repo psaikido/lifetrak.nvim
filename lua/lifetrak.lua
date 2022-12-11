@@ -106,16 +106,15 @@ M._build_output = function(tags)
         table.insert(entries, entry)
     end
 
-    -- utils.insp(entries)
     M._output(entries)
 end
 
 
 M._get_entry = function(entry_line_no)
-    utils.insp(entry_line_no)
     local entry = {}
     -- we have a line number of the tag being searched
     -- it's 7 below the starting '---'
+    -- we go up 8 because we want to 1 above when we start
     local line_no_top = entry_line_no - 8
 
     -- go through each line looking for the next entry start ie. '---'
@@ -126,11 +125,7 @@ M._get_entry = function(entry_line_no)
         local line = vim.api.nvim_buf_get_lines(0, line_no_top, line_no_top + 1, false)
         line_no_top = line_no_top + 1
 
-        -- make sure we don't go off the end of the list
-        -- if (line_no_top >= vim.api.nvim_buf_line_count(0)) then
-        --     break
-        -- end
-
+        -- look for the second new entry dashes and stop there
         if ((line[1] == '---') and (line_no_top > entry_line_no + 2)) then
             next_entry_found = true
         else
@@ -143,8 +138,8 @@ end
 
 
 M._output = function(entries)
-    vim.api.nvim_command('tabnew') -- We open a new vertical window at the far right
-    buf = vim.api.nvim_get_current_buf() -- ...and it's buffer handle.
+    vim.api.nvim_command('tabnew')
+    buf = vim.api.nvim_get_current_buf()
     vim.api.nvim_buf_set_name(buf, 'Journal filter #' .. buf)
     vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
     vim.api.nvim_buf_set_option(buf, 'swapfile', false)
@@ -207,6 +202,5 @@ M._is_unique = function(things, thing)
 end
 
 journal_text = M._get_whole_buffer()
--- utils.insp(journal_text)
 
 return M
