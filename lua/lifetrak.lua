@@ -3,6 +3,19 @@ M = {}
 local utils = require('utils')
 
 
+function M.setup(opts)
+    -- utils.p(opts)
+    local journal_file_exists = vim.fn.filereadable(vim.fn.expand(opts['journal']))
+
+    if (journal_file_exists == 1) then
+        print('ok')
+    else
+        print('not ok')
+    end
+    -- utils.p(journal_file)
+end
+
+
 function M.journal_entry()
     local header = M._make_header()
 
