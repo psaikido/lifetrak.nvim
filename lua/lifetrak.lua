@@ -3,7 +3,7 @@ M = {}
 local utils = require('utils')
 
 
-M.journal_entry = function()
+function M.journal_entry()
     local header = M._make_header()
 
     -- add 4 blank lines at the top
@@ -25,7 +25,7 @@ M.journal_entry = function()
 end
 
 
-M._make_header = function()
+function M._make_header()
     local header = {}
 
     table.insert(header, '---')
@@ -54,7 +54,7 @@ M._make_header = function()
 end
 
 
-M._get_metas = function()
+function M._get_metas()
     local formatted_metas = {}
 
     for _, v in pairs(vim.g.lifetrak_metas) do
@@ -66,17 +66,17 @@ M._get_metas = function()
 end
 
 
-M.view_down = function()
+function M.view_down()
     vim.cmd('execute "normal! /^---$\rzt:nohlsearch\r"')
 end
 
 
-M.view_up = function()
+function M.view_up()
     vim.cmd('execute "normal! ?^---$\rzt:nohlsearch\r"')
 end
 
 
-M.choose_tag = function()
+function M.choose_tag()
     local tags = M.get_tags()
     local tag_prompts = 'Choose a tag: ' .. vim.inspect(tags) .. ': '
     vim.ui.input({ prompt = tag_prompts }, function(input)
@@ -85,7 +85,7 @@ M.choose_tag = function()
 end
 
 
-M._filter_by_tag = function(tag)
+function M._filter_by_tag(tag)
     local chosen_tags = {}
 
     for k, v in pairs(M._get_whole_buffer()) do
@@ -98,7 +98,7 @@ M._filter_by_tag = function(tag)
 end
 
 
-M._build_output = function(tags)
+function M._build_output(tags)
     local entries = {}
 
     for k, v in pairs(tags) do
@@ -110,7 +110,7 @@ M._build_output = function(tags)
 end
 
 
-M._get_entry = function(entry_line_no)
+function M._get_entry(entry_line_no)
     local entry = {}
     -- we have a line number of the tag being searched
     -- it's 7 below the starting '---'
@@ -137,7 +137,7 @@ M._get_entry = function(entry_line_no)
 end
 
 
-M._output = function(entries)
+function M._output(entries)
     vim.api.nvim_command('tabnew')
     buf = vim.api.nvim_get_current_buf()
     vim.api.nvim_buf_set_name(buf, 'Journal filter #' .. buf)
@@ -156,7 +156,7 @@ M._output = function(entries)
 end
 
 
-M.get_tags = function()
+function M.get_tags()
     local all_tags = {}
 
     for k, v in pairs(M._get_whole_buffer()) do
@@ -180,18 +180,18 @@ M.get_tags = function()
 end
 
 
-M._get_whole_buffer = function()
+function M._get_whole_buffer()
     return vim.api.nvim_buf_get_lines(0, 0, -1, {})
 end
 
 
-M._add_unique = function(things, thing)
+function M._add_unique(things, thing)
     if (M._is_unique(things, thing)) then
         table.insert(things, vim.trim(thing))
     end
 end
 
-M._is_unique = function(things, thing)
+function M._is_unique(things, thing)
     for _, v in pairs(things) do
         if (v == thing) then
             return false
