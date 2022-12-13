@@ -1,18 +1,43 @@
 M = {}
 
 local utils = require('utils')
+local config = {}
+vim.api.nvim_create_user_command("LifetrakInit", ":lua require('lifetrak').set_journal_file()", {})
+
+function M.init(opts)
+    config = opts
+end
 
 
-function M.setup(opts)
-    -- utils.p(opts)
-    local journal_file_exists = vim.fn.filereadable(vim.fn.expand(opts['journal']))
+function M.set_journal_file()
+    -- utils.p(config)
+    local journal_file_exists = vim.fn.filereadable(vim.fn.expand(config['journal']))
 
-    if (journal_file_exists == 1) then
-        print('ok')
+    if (journal_file_exists == 0) then
+        vim.ui.input({ prompt = 'Do you want to initialise a journal? (y/n)' }, function(input)
+            if (input == 'y') then
+                local file = io.open(vim.fn.expand(config['journal']), 'w')
+                if (file ~= nil) then
+                    local header = M._make_header()
+                    local header_text = ''
+
+                    for _, v in pairs(M._make_header()) do
+                        header_text = header_text .. v .. "\n"
+                    end
+
+                    file:write(header_text)
+                    file:close()
+                    print(config['journal'] .. ' ready')
+                else
+                    utils.p(file)
+                end
+            end
+        end)
     else
-        print('not ok')
+        vim.ui.input({ prompt = 'Do you want to open the journal? (y/n)' }, function(input)
+            utils.p(input)
+        end)
     end
-    -- utils.p(journal_file)
 end
 
 
@@ -51,6 +76,7 @@ function M._make_header()
     -- get the 3rd line which should have the last id
     local id_line = vim.api.nvim_buf_get_lines(0, 2, 3, false)
     local id = string.match(id_line[1], '%d+')
+    if (id == nil) then id = 0 end
     local next_id = id + 1
     local header_id = '# id: ' .. next_id 
     table.insert(header, header_id)
@@ -70,7 +96,7 @@ end
 function M._get_metas()
     local formatted_metas = {}
 
-    for _, v in pairs(vim.g.lifetrak_metas) do
+    for _, v in pairs(config['metas']) do
         local formatted_meta = '- ' .. v .. ': '
         table.insert(formatted_metas, formatted_meta)
     end
