@@ -4,6 +4,7 @@ local utils = require('utils')
 local config = {}
 vim.api.nvim_create_user_command("LifetrakOpen", ":lua require('lifetrak').set_journal_file()", {})
 vim.api.nvim_create_user_command("LifetrakEntry", ":lua require('lifetrak').journal_entry()", {})
+vim.api.nvim_create_user_command("LifetrakFilter", ":lua require('lifetrak').choose_tag()", {})
 
 
 function M.init(opts)
@@ -91,13 +92,13 @@ function M._make_header()
     local header_id = '# id: ' .. next_id 
     table.insert(header, header_id)
 
+    -- add the 'tag'
+    table.insert(header, '- tags: ')
+
     -- add the 'meta' categories or 'tags'
     for _, v in pairs(M._get_metas()) do
         table.insert(header, v)
     end
-
-    -- add the final 'tag'
-    table.insert(header, '- tags: ')
     
     return header
 end
@@ -162,9 +163,9 @@ end
 function M._get_entry(entry_line_no)
     local entry = {}
     -- we have a line number of the tag being searched
-    -- it's 7 below the starting '---'
-    -- we go up 8 because we want to 1 above when we start
-    local line_no_top = entry_line_no - 8
+    -- it's 3 below the starting '---'
+    -- we go up 4 because we want to 1 above when we start
+    local line_no_top = entry_line_no - 4
 
     -- go through each line looking for the next entry start ie. '---'
     -- which signals the start of the next entry
@@ -179,6 +180,11 @@ function M._get_entry(entry_line_no)
             next_entry_found = true
         else
             table.insert(entry, line)
+        end
+        
+        -- dont' let the loop run off the end of the buffer
+        if (line_no_top == vim.api.nvim_buf_line_count(0)) then
+            next_entry_found = true
         end
     end
 
@@ -239,6 +245,7 @@ function M._add_unique(things, thing)
         table.insert(things, vim.trim(thing))
     end
 end
+
 
 function M._is_unique(things, thing)
     for _, v in pairs(things) do
