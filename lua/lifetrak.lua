@@ -2,42 +2,52 @@ M = {}
 
 local utils = require('utils')
 local config = {}
-vim.api.nvim_create_user_command("LifetrakInit", ":lua require('lifetrak').set_journal_file()", {})
+vim.api.nvim_create_user_command("LifetrakOpen", ":lua require('lifetrak').set_journal_file()", {})
+vim.api.nvim_create_user_command("LifetrakEntry", ":lua require('lifetrak').journal_entry()", {})
+
 
 function M.init(opts)
     config = opts
 end
 
 
+function M._make_new_journal()
+    vim.ui.input({ prompt = 'Do you want to initialise a journal? (y/n)' }, function(input)
+        if (input == 'y') then
+            local file = io.open(vim.fn.expand(config['journal']), 'w')
+            if (file ~= nil) then
+                local header = M._make_header()
+                local header_text = ''
+
+                for _, v in pairs(M._make_header()) do
+                    header_text = header_text .. v .. "\n"
+                end
+
+                file:write(header_text)
+                file:close()
+                M._open_journal()
+            else
+                utils.p(file)
+            end
+        end
+    end)
+end
+
+
 function M.set_journal_file()
-    -- utils.p(config)
     local journal_file_exists = vim.fn.filereadable(vim.fn.expand(config['journal']))
 
     if (journal_file_exists == 0) then
-        vim.ui.input({ prompt = 'Do you want to initialise a journal? (y/n)' }, function(input)
-            if (input == 'y') then
-                local file = io.open(vim.fn.expand(config['journal']), 'w')
-                if (file ~= nil) then
-                    local header = M._make_header()
-                    local header_text = ''
-
-                    for _, v in pairs(M._make_header()) do
-                        header_text = header_text .. v .. "\n"
-                    end
-
-                    file:write(header_text)
-                    file:close()
-                    print(config['journal'] .. ' ready')
-                else
-                    utils.p(file)
-                end
-            end
-        end)
+        M._make_new_journal()
     else
-        vim.ui.input({ prompt = 'Do you want to open the journal? (y/n)' }, function(input)
-            utils.p(input)
-        end)
+        M._open_journal()
     end
+end
+
+
+function M._open_journal()
+    local cmd = ':e ' .. config['journal']
+    vim.cmd(cmd)
 end
 
 
