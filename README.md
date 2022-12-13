@@ -13,10 +13,15 @@ Open it and then use these commands via the suggested mappings
 ## Default keymaps
 The following mappings are set in an autocmd block in the main source code.
 
-- 'leader'+ le = JournalEntry() - make a new journal entry with today's date and an id.  
-- 'leader'+ lt = ChooseATag() - filter any populated 'tags' entries to a new window.
-- 'leader'+ ld = ViewDown() - move down one journal entry.
-- 'leader'+ lu = ViewUp() - move up one journal entry.
+- 'leader'+ le = journal_entry() - make a new journal entry with today's date and an id.  
+- 'leader'+ lt = choose_a_tag() - filter any populated 'tags' entries to a new window.
+- 'leader'+ ld = view_down() - move down one journal entry.
+- 'leader'+ lu = view_up() - move up one journal entry.
+
+Commands are also offered. Use:
+- :LifetrakOpen - give the option to initialise a new journal or just open any existing one
+- :LifetrakEntry - as in 'journal_entry' above
+- :LifetrakFilter - as in 'choose_a_tag' above
 
 
 ## Tags
