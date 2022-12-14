@@ -19,13 +19,16 @@ The following mappings are set in an autocmd block in the main source code.
 - 'leader'+ lu = view_up() - move up one journal entry.
 
 Commands are also offered. Use:
-- :LifetrakOpen - give the option to initialise a new journal or just open any existing one
 - :LifetrakEntry - as in 'journal_entry' above
+- :LifetrakOpen - give the option to initialise a new journal or just open any existing one
 - :LifetrakFilter - as in 'choose_a_tag' above
 
 
-## Tags
-vim.opts.lifetrak_metas = {'energy', 'pain', 'mood', 'sleep'}
+## Config
+require('lifetrak').init({ 
+    journal = '~/journal.lft',
+    metas = {'energy', 'pain', 'mood', 'sleep'},
+})
 
 
 ## Todo
