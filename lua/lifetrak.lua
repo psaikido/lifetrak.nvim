@@ -17,7 +17,6 @@ function M._make_new_journal()
         if (input == 'y') then
             local file = io.open(vim.fn.expand(config['journal']), 'w')
             if (file ~= nil) then
-                local header = M._make_header()
                 local header_text = ''
 
                 for _, v in pairs(M._make_header()) do
@@ -27,8 +26,6 @@ function M._make_new_journal()
                 file:write(header_text)
                 file:close()
                 M._open_journal()
-            else
-                utils.p(file)
             end
         end
     end)
@@ -231,6 +228,7 @@ function M.get_tags()
         end
     end
 
+    table.sort(all_tags)
     return all_tags
 end
 
