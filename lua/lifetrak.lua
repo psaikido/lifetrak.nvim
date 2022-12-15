@@ -1,14 +1,17 @@
 M = {}
 
-local utils = require('utils')
+local u = require('utils')
 local config = {}
-vim.api.nvim_create_user_command("LifetrakOpen", ":lua require('lifetrak').set_journal_file()", {})
-vim.api.nvim_create_user_command("LifetrakEntry", ":lua require('lifetrak').journal_entry()", {})
-vim.api.nvim_create_user_command("LifetrakFilter", ":lua require('lifetrak').choose_tag()", {})
+
+
+function M.lifetrak()
+    u.p(config)
+end
 
 
 function M.init(opts)
     config = opts
+    print('init')
 end
 
 
