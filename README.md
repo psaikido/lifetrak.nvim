@@ -33,8 +33,7 @@ require('lifetrak').init({
 
 ## Todo
 - Add plenary testing
-- Set up an install with a default journal file
-- Allow user to configure the journal file and path
 - Use some sort of storage to get latest entry id
 - Storage could keep stats to display
 - Consider building encryption in
+- Allow for multiple journals
