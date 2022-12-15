@@ -4,70 +4,77 @@ local u = require('utils')
 local config = {}
 
 
-local function is_unique(things, thing)
-    for _, v in pairs(things) do
-        if (v == thing) then
-            return false
-        end
-    end
-
-    return true
+function M.lifetrak()
+    u.p(config)
 end
 
 
-local function add_unique(things, thing)
-    if (is_unique(things, thing)) then
-        table.insert(things, vim.trim(thing))
-    end
+function M.init(opts)
+    config = opts
+    print('init')
 end
 
 
-local function make_new_journal()
+function M._make_new_journal()
     vim.ui.input({ prompt = 'Do you want to initialise a journal? (y/n)' }, function(input)
         if (input == 'y') then
             local file = io.open(vim.fn.expand(config['journal']), 'w')
             if (file ~= nil) then
                 local header_text = ''
 
-                for _, v in pairs(make_header()) do
+                for _, v in pairs(M._make_header()) do
                     header_text = header_text .. v .. "\n"
                 end
 
                 file:write(header_text)
                 file:close()
-                open_journal()
+                M._open_journal()
             end
         end
     end)
 end
 
 
-local function open_journal()
+function M.set_journal_file()
+    local journal_file_exists = vim.fn.filereadable(vim.fn.expand(config['journal']))
+
+    if (journal_file_exists == 0) then
+        M._make_new_journal()
+    else
+        M._open_journal()
+    end
+end
+
+
+function M._open_journal()
     local cmd = ':e ' .. config['journal']
     vim.cmd(cmd)
 end
 
 
-local function output(entries)
-    vim.api.nvim_command('tabnew')
-    buf = vim.api.nvim_get_current_buf()
-    vim.api.nvim_buf_set_name(buf, 'Journal filter #' .. buf)
-    vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
-    vim.api.nvim_buf_set_option(buf, 'swapfile', false)
-    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
-    vim.api.nvim_buf_set_option(buf, 'filetype', 'lft')
+function M.journal_entry()
+    local header = M._make_header()
 
-    local count = 0
-    for _, v in pairs(entries) do
-        for _, y in pairs(v) do
-            vim.api.nvim_buf_set_lines(buf, count, count, false, y)
-            count = count + 1
-        end
+    -- add 4 blank lines at the top
+    local num = 1
+    while num <= 4 do
+        vim.api.nvim_buf_set_lines(0, 0, 0, false, {""})
+        num = num + 1
     end
+
+    -- write all the header rows to the top of the document
+    for k, v in pairs(header) do
+        k = k - 1 -- buffer index is 0 based, lua is 1 based
+        vim.api.nvim_buf_set_lines(0, k, k, false, {v})
+    end
+
+    -- put cursor at line 10
+    vim.api.nvim_buf_set_mark(0, 'a', 10, 0, {})
+    vim.cmd("'a")
 end
 
 
-local function make_header()
+function M._make_header()
     local header = {}
 
     table.insert(header, '---')
@@ -89,7 +96,7 @@ local function make_header()
     table.insert(header, '- tags: ')
 
     -- add the 'meta' categories or 'tags'
-    for _, v in pairs(get_metas()) do
+    for _, v in pairs(M._get_metas()) do
         table.insert(header, v)
     end
     
@@ -97,7 +104,7 @@ local function make_header()
 end
 
 
-local function get_metas()
+function M._get_metas()
     local formatted_metas = {}
 
     for _, v in pairs(config['metas']) do
@@ -109,12 +116,51 @@ local function get_metas()
 end
 
 
-local function get_whole_buffer()
-    return vim.api.nvim_buf_get_lines(0, 0, -1, {})
+function M.view_down()
+    vim.cmd('execute "normal! /^---$\rzt:nohlsearch\r"')
 end
 
 
-local function get_entry(entry_line_no)
+function M.view_up()
+    vim.cmd('execute "normal! ?^---$\rzt:nohlsearch\r"')
+end
+
+
+function M.choose_tag()
+    local tags = M.get_tags()
+    local tag_prompts = 'Choose a tag: ' .. vim.inspect(tags) .. ': '
+    vim.ui.input({ prompt = tag_prompts }, function(input)
+        M._filter_by_tag(input)
+    end)
+end
+
+
+function M._filter_by_tag(tag)
+    local chosen_tags = {}
+
+    for k, v in pairs(M._get_whole_buffer()) do
+        if (string.match(v, '- tags:') and string.match(v, tag)) then
+            table.insert(chosen_tags, {k, v})
+        end
+    end
+
+    local output = M._build_output(chosen_tags)
+end
+
+
+function M._build_output(tags)
+    local entries = {}
+
+    for k, v in pairs(tags) do
+        local entry = M._get_entry(v[1])
+        table.insert(entries, entry)
+    end
+
+    M._output(entries)
+end
+
+
+function M._get_entry(entry_line_no)
     local entry = {}
     -- we have a line number of the tag being searched
     -- it's 3 below the starting '---'
@@ -146,76 +192,29 @@ local function get_entry(entry_line_no)
 end
 
 
-local function build_output(tags)
-    local entries = {}
+function M._output(entries)
+    vim.api.nvim_command('tabnew')
+    buf = vim.api.nvim_get_current_buf()
+    vim.api.nvim_buf_set_name(buf, 'Journal filter #' .. buf)
+    vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
+    vim.api.nvim_buf_set_option(buf, 'swapfile', false)
+    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
+    vim.api.nvim_buf_set_option(buf, 'filetype', 'lft')
 
-    for k, v in pairs(tags) do
-        local entry = get_entry(v[1])
-        table.insert(entries, entry)
-    end
-
-    output(entries)
-end
-
-
-local function filter_by_tag(tag)
-    local chosen_tags = {}
-
-    for k, v in pairs(get_whole_buffer()) do
-        if (string.match(v, '- tags:') and string.match(v, tag)) then
-            table.insert(chosen_tags, {k, v})
+    local count = 0
+    for _, v in pairs(entries) do
+        for _, y in pairs(v) do
+            vim.api.nvim_buf_set_lines(buf, count, count, false, y)
+            count = count + 1
         end
     end
-
-    local output = build_output(chosen_tags)
-end
-
-
-function M.journal_entry()
-    local header = make_header()
-
-    -- add 4 blank lines at the top
-    local num = 1
-    while num <= 4 do
-        vim.api.nvim_buf_set_lines(0, 0, 0, false, {""})
-        num = num + 1
-    end
-
-    -- write all the header rows to the top of the document
-    for k, v in pairs(header) do
-        k = k - 1 -- buffer index is 0 based, lua is 1 based
-        vim.api.nvim_buf_set_lines(0, k, k, false, {v})
-    end
-
-    -- put cursor at line 10
-    vim.api.nvim_buf_set_mark(0, 'a', 10, 0, {})
-    vim.cmd("'a")
-end
-
-
-function M.view_down()
-    vim.cmd('execute "normal! /^---$\rzt:nohlsearch\r"')
-end
-
-
-function M.view_up()
-    vim.cmd('execute "normal! ?^---$\rzt:nohlsearch\r"')
-end
-
-
-function M.choose_tag()
-    local tags = M.get_tags()
-    local tag_prompts = 'Choose a tag: ' .. vim.inspect(tags) .. ': '
-    vim.ui.input({ prompt = tag_prompts }, function(input)
-        filter_by_tag(input)
-    end)
 end
 
 
 function M.get_tags()
     local all_tags = {}
 
-    for k, v in pairs(get_whole_buffer()) do
+    for k, v in pairs(M._get_whole_buffer()) do
         if (string.match(v, '- tags:') and string.len(v) > 8) then
             -- remove the '- tags: ' prefix
             local tag = string.sub(v, 9)
@@ -224,10 +223,10 @@ function M.get_tags()
             -- split up multiple tags if there are any
             if (string.find(tag, ',') ~= nil) then
                 for y in string.gmatch(tag, "%a+") do
-                    add_unique(all_tags, y)
+                    M._add_unique(all_tags, y)
                 end
             else
-                add_unique(all_tags, tag)
+                M._add_unique(all_tags, tag)
             end
         end
     end
@@ -237,27 +236,28 @@ function M.get_tags()
 end
 
 
-function M.lifetrak()
-    u.p(config)
+function M._get_whole_buffer()
+    return vim.api.nvim_buf_get_lines(0, 0, -1, {})
 end
 
 
-function M.init(opts)
-    config = opts
-end
-
-
-function M.set_journal_file()
-    local journal_file_exists = vim.fn.filereadable(vim.fn.expand(config['journal']))
-
-    if (journal_file_exists == 0) then
-        make_new_journal()
-    else
-        open_journal()
+function M._add_unique(things, thing)
+    if (M._is_unique(things, thing)) then
+        table.insert(things, vim.trim(thing))
     end
 end
 
 
-local journal_text = get_whole_buffer()
+function M._is_unique(things, thing)
+    for _, v in pairs(things) do
+        if (v == thing) then
+            return false
+        end
+    end
+
+    return true
+end
+
+journal_text = M._get_whole_buffer()
 
 return M
