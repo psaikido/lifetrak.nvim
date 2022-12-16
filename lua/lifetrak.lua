@@ -2,23 +2,50 @@ M = {}
 
 local u = require('utils')
 local config = {}
-
-
-function M.lifetrak()
-    u.p(config)
-end
+local Path = require('plenary.path')
 
 
 function M.init(opts)
     config = opts
-    print('init')
 end
 
 
-function M._make_new_journal()
+function M.refresh()
+    local cache_config = M._get_json_file_name()
+    Path:new(cache_config):write(vim.fn.json_encode(config), "w")
+end
+
+
+function M.change_current()
+    local disk_config = M._get_disk_config()
+    local question = ''
+
+    for k, v in pairs(disk_config['journals']) do
+        question = question .. k .. ': ' .. v['file'] .. "\n"
+    end
+
+    vim.ui.input({ prompt = question .. "\nChoose a journal's number: " }, function(input)
+        M._set_journal_file(disk_config['journals'][tonumber(input)].file)
+    end)
+end
+
+function M._get_disk_config()
+    local cache_config = M._get_json_file_name()
+    local disk_config = vim.json.decode(Path:new(cache_config):read())
+    return disk_config
+end
+
+
+function M._get_json_file_name()
+    local data_path = vim.fn.stdpath("data")
+    return string.format('%s/lifetrak.json', data_path)
+end
+
+
+function M._make_new_journal(file)
     vim.ui.input({ prompt = 'Do you want to initialise a journal? (y/n)' }, function(input)
         if (input == 'y') then
-            local file = io.open(vim.fn.expand(config['journal']), 'w')
+            local file = io.open(vim.fn.expand(file), 'w')
             if (file ~= nil) then
                 local header_text = ''
 
@@ -28,27 +55,26 @@ function M._make_new_journal()
 
                 file:write(header_text)
                 file:close()
-                M._open_journal()
+                M._open_journal(file)
             end
         end
     end)
 end
 
 
-function M.set_journal_file()
-    local journal_file_exists = vim.fn.filereadable(vim.fn.expand(config['journal']))
+function M._set_journal_file(file)
+    local journal_file_exists = vim.fn.filereadable(vim.fn.expand(file))
 
     if (journal_file_exists == 0) then
-        M._make_new_journal()
+        M._make_new_journal(file)
     else
-        M._open_journal()
+        M._open_journal(file)
     end
 end
 
 
-function M._open_journal()
-    local cmd = ':e ' .. config['journal']
-    vim.cmd(cmd)
+function M._open_journal(file)
+    vim.cmd(':e ' .. tostring(file))
 end
 
 
