@@ -115,6 +115,7 @@ function M._make_header()
     local id = string.match(id_line[1], '%d+')
     if (id == nil) then id = 0 end
     local next_id = id + 1
+
     local header_id = '# id: ' .. next_id 
     table.insert(header, header_id)
 
@@ -127,6 +128,10 @@ function M._make_header()
     end
     
     return header
+end
+
+
+function M._get_next_id()
 end
 
 

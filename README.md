@@ -31,8 +31,12 @@ require('lifetrak').init({
 })
 
 
+## Testing
+run:  
+nvim --headless -c "PlenaryBustedFile ./test_spec.lua"
+
+
 ## Todo
-- Add plenary testing
 - Use some sort of storage to get latest entry id
 - Storage could keep stats to display
 - Consider building encryption in
