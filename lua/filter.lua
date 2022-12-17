@@ -1,8 +1,18 @@
+M = {}
+
+local u = require('utils')
+
 function M.choose_tag()
-    local tags = M.get_tags()
-    local tag_prompts = 'Choose a tag: ' .. vim.inspect(tags) .. ': '
+    local tags = M._get_tags()
+    local tags_list = ''
+
+    for k, v in pairs(tags) do
+        tags_list = tags_list .. k .. ': ' .. v .. "\n"
+    end
+
+    local tag_prompts = "Choose a tag: \n" .. tags_list .. ': '
     vim.ui.input({ prompt = tag_prompts }, function(input)
-        M._filter_by_tag(input)
+        M._filter_by_tag(tags[tonumber(input)])
     end)
 end
 
@@ -16,7 +26,7 @@ function M._filter_by_tag(tag)
         end
     end
 
-    local output = M._build_output(chosen_tags)
+    M._build_output(chosen_tags)
 end
 
 
@@ -83,7 +93,7 @@ function M._output(entries)
 end
 
 
-function M.get_tags()
+function M._get_tags()
     local all_tags = {}
 
     for k, v in pairs(M._get_whole_buffer()) do
@@ -129,3 +139,5 @@ function M._is_unique(things, thing)
 
     return true
 end
+
+return M
