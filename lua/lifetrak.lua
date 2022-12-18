@@ -114,7 +114,7 @@ function M._make_header()
     -- create a formatted 'today'
     local today = vim.fn.strftime('%Y-%m-%d %a')
     table.insert(header, '# ' .. today)
-    
+
     -- make an incremented journal id
     -- get the 3rd line which should have the last id
     local id_line = vim.api.nvim_buf_get_lines(0, 2, 3, false)
@@ -132,21 +132,22 @@ function M._make_header()
     for _, v in pairs(M._get_metas()) do
         table.insert(header, v)
     end
-    
+
     return header
-end
-
-
-function M._get_next_id()
 end
 
 
 function M._get_metas()
     local formatted_metas = {}
+    local cache_config = M._get_disk_config()
+    local current_journal = cache_config['current_journal']
+    local metas = cache_config['journals'][current_journal].metas
 
-    for _, v in pairs(config['metas']) do
-        local formatted_meta = '- ' .. v .. ': '
-        table.insert(formatted_metas, formatted_meta)
+    if (metas ~= nil) then
+        for _, v in pairs(metas) do
+            local formatted_meta = '- ' .. v .. ': '
+            table.insert(formatted_metas, formatted_meta)
+        end
     end
 
     return formatted_metas
