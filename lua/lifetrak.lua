@@ -5,12 +5,14 @@ local config = {}
 local Path = require('plenary.path')
 local filter = require('filter')
 
+
 function M.init(opts)
     config = opts
+    M._refresh()
 end
 
 
-function M.refresh()
+function M._refresh()
     local cache_config = M._get_json_file_name()
     Path:new(cache_config):write(vim.fn.json_encode(config), "w")
 end
@@ -25,7 +27,7 @@ function M.change_current()
     end
 
     vim.ui.input({ prompt = question .. "\nChoose a journal's number: " }, function(input)
-        M._set_journal_file(disk_config['journals'][tonumber(input)].file)
+        M._set_journal_file(tonumber(input), disk_config)
     end)
 end
 
@@ -62,18 +64,22 @@ function M._make_new_journal(file)
 end
 
 
-function M._set_journal_file(file)
+function M._set_journal_file(chosen_index, disk_config)
+    local file = disk_config['journals'][chosen_index].file
     local journal_file_exists = vim.fn.filereadable(vim.fn.expand(file))
 
     if (journal_file_exists == 0) then
         M._make_new_journal(file)
     else
-        M._open_journal(file)
+        M._open_journal(file, chosen_index)
     end
 end
 
 
-function M._open_journal(file)
+function M._open_journal(file, chosen_index)
+    -- update current_journal in the cache_config
+    config['current_journal'] = chosen_index
+    M._refresh()
     vim.cmd(':e ' .. tostring(file))
 end
 
