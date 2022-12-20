@@ -1,9 +1,8 @@
-M = {}
+local M = {}
 
-local u = require('utils')
-local config = {}
+local u = require('hc.utils')
 local Path = require('plenary.path')
-local filter = require('filter')
+local config = {}
 
 
 function M.init(opts)
@@ -15,6 +14,14 @@ end
 function M._refresh()
     local cache_config = M._get_json_file_name()
     Path:new(cache_config):write(vim.fn.json_encode(config), "w")
+end
+
+
+function M.open_current()
+    local disk_config = M._get_disk_config()
+    local chosen_index = disk_config['default_journal_index']
+    local file = disk_config['journals'][chosen_index].file
+    M._open_journal(file, chosen_index)
 end
 
 
@@ -100,8 +107,9 @@ function M.journal_entry()
         vim.api.nvim_buf_set_lines(0, k, k, false, {v})
     end
 
-    -- put cursor at line 10
-    vim.api.nvim_buf_set_mark(0, 'a', 10, 0, {})
+    -- put cursor 2 lines below the headers
+    local edit_line = #header + 2
+    vim.api.nvim_buf_set_mark(0, 'a', edit_line, 0, {})
     vim.cmd("'a")
 end
 
@@ -128,7 +136,7 @@ function M._make_header()
     -- add the 'tag'
     table.insert(header, '- tags: ')
 
-    -- add the 'meta' categories or 'tags'
+    -- add the 'meta' categories
     for _, v in pairs(M._get_metas()) do
         table.insert(header, v)
     end
@@ -139,9 +147,16 @@ end
 
 function M._get_metas()
     local formatted_metas = {}
+    local metas = {}
     local cache_config = M._get_disk_config()
     local current_journal = cache_config['current_journal']
-    local metas = cache_config['journals'][current_journal].metas
+    local default_journal_index = cache_config['default_journal_index']
+
+    if (current_journal ~= nil) then
+        metas = cache_config['journals'][current_journal].metas
+    else
+        metas = cache_config['journals'][default_journal_index].metas
+    end
 
     if (metas ~= nil) then
         for _, v in pairs(metas) do

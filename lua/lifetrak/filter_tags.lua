@@ -1,12 +1,12 @@
-M = {}
+local M = {}
 
-local u = require('utils')
+local u = require('hc.utils')
 
 function M.choose_tag()
     local tags = M._get_tags()
     local tags_list = ''
 
-    for k, v in pairs(tags) do
+    for k, v in ipairs(tags) do
         tags_list = tags_list .. k .. ': ' .. v .. "\n"
     end
 
@@ -33,7 +33,7 @@ end
 function M._build_output(tags)
     local entries = {}
 
-    for k, v in pairs(tags) do
+    for _, v in pairs(tags) do
         local entry = M._get_entry(v[1])
         table.insert(entries, entry)
     end
@@ -51,8 +51,8 @@ function M._get_entry(entry_line_no)
 
     -- go through each line looking for the next entry start ie. '---'
     -- which signals the start of the next entry
-    local next_entry_found = false 
-    
+    local next_entry_found = false
+
     while next_entry_found == false do
         local line = vim.api.nvim_buf_get_lines(0, line_no_top, line_no_top + 1, false)
         line_no_top = line_no_top + 1
@@ -63,7 +63,7 @@ function M._get_entry(entry_line_no)
         else
             table.insert(entry, line)
         end
-        
+
         -- dont' let the loop run off the end of the buffer
         if (line_no_top == vim.api.nvim_buf_line_count(0)) then
             next_entry_found = true
@@ -96,7 +96,7 @@ end
 function M._get_tags()
     local all_tags = {}
 
-    for k, v in pairs(M._get_whole_buffer()) do
+    for _, v in pairs(M._get_whole_buffer()) do
         if (string.match(v, '- tags:') and string.len(v) > 8) then
             -- remove the '- tags: ' prefix
             local tag = string.sub(v, 9)

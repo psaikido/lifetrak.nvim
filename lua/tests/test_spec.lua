@@ -11,9 +11,6 @@ local function assert_table_equals(expected, actual)
 end
 
 describe("lifetrak functions", function()
-    before_each(function()
-    end)
-
     it("test init & _get_disk_config", function()
         local expected = {
             journals = {

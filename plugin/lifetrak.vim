@@ -3,10 +3,11 @@ if exists('g:loaded_lifetrak') | finish | endif " prevent loading file twice
 let s:save_cpo = &cpo " save user coptions
 set cpo&vim " reset them to defaults
 
-command! LifetrakChangeCurrent lua require('lifetrak').change_current()
-command! LifetrakEntry lua require('lifetrak').journal_entry()
-command! LifetrakFilter lua require('lifetrak').choose_tag()
-command! LifetrakRefresh lua require('lifetrak').refresh()
+command! Lifetrak execute ":lua require('lifetrak').open_current()"
+command! LifetrakChangeCurrent execute ":lua require('lifetrak').change_current()"
+command! LifetrakEntry execute ":lua require('lifetrak').journal_entry()"
+command! LifetrakFilterMetas execute ":lua require('lifetrak.filter_metas').choose_meta()"
+command! LifetrakFilterTags execute ":lua require('lifetrak').choose_tag()"
 
 au BufNewFile,BufRead *.lft set filetype=lft
 
