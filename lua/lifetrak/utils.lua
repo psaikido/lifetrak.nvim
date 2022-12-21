@@ -33,7 +33,8 @@ end
 
 
 function M.reload()
-    -- vim.cmd('command! lifetrakReload lua require('plenary.reload').reload_module("lifetrak")')
+    require('plenary.reload').reload_module("lifetrak")
+    vim.notify("Lifetrak modules reloaded!", vim.log.levels.INFO)
 end
 
 
