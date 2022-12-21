@@ -1,6 +1,6 @@
 local M = {}
 
-local u = require('hc.utils')
+local utils = require('lifetrak.utils')
 local Path = require('plenary.path')
 local config = {}
 
@@ -12,13 +12,13 @@ end
 
 
 function M._refresh()
-    local cache_config = M._get_json_file_name()
+    local cache_config = utils.get_json_file_name()
     Path:new(cache_config):write(vim.fn.json_encode(config), "w")
 end
 
 
 function M.open_current()
-    local disk_config = M._get_disk_config()
+    local disk_config = utils.get_disk_config()
     local chosen_index = disk_config['default_journal_index']
     local file = disk_config['journals'][chosen_index].file
     M._open_journal(file, chosen_index)
@@ -26,7 +26,7 @@ end
 
 
 function M.change_current()
-    local disk_config = M._get_disk_config()
+    local disk_config = utils.get_disk_config()
     local question = ''
 
     for k, v in pairs(disk_config['journals']) do
@@ -37,19 +37,6 @@ function M.change_current()
         M._set_journal_file(tonumber(input), disk_config)
     end)
 end
-
-function M._get_disk_config()
-    local cache_config = M._get_json_file_name()
-    local disk_config = vim.json.decode(Path:new(cache_config):read())
-    return disk_config
-end
-
-
-function M._get_json_file_name()
-    local data_path = vim.fn.stdpath("data")
-    return string.format('%s/lifetrak.json', data_path)
-end
-
 
 function M._make_new_journal(file)
     vim.ui.input({ prompt = 'Do you want to initialise a journal? (y/n)' }, function(input)
@@ -130,14 +117,14 @@ function M._make_header()
     if (id == nil) then id = 0 end
     local next_id = id + 1
 
-    local header_id = '# id: ' .. next_id 
+    local header_id = '# id: ' .. next_id
     table.insert(header, header_id)
 
     -- add the 'tag'
     table.insert(header, '- tags: ')
 
     -- add the 'meta' categories
-    for _, v in pairs(M._get_metas()) do
+    for _, v in pairs(M.get_formatted_metas()) do
         table.insert(header, v)
     end
 
@@ -145,18 +132,9 @@ function M._make_header()
 end
 
 
-function M._get_metas()
+function M.get_formatted_metas()
     local formatted_metas = {}
-    local metas = {}
-    local cache_config = M._get_disk_config()
-    local current_journal = cache_config['current_journal']
-    local default_journal_index = cache_config['default_journal_index']
-
-    if (current_journal ~= nil) then
-        metas = cache_config['journals'][current_journal].metas
-    else
-        metas = cache_config['journals'][default_journal_index].metas
-    end
+    local metas = utils.get_metas()
 
     if (metas ~= nil) then
         for _, v in pairs(metas) do

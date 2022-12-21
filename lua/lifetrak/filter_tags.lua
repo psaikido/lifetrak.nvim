@@ -1,6 +1,5 @@
 local M = {}
 
-local u = require('hc.utils')
 
 function M.choose_tag()
     local tags = M._get_tags()

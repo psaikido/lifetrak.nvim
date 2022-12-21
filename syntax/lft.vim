@@ -4,11 +4,11 @@
 "    ---
 "    # 2021-11-16
 "    - id: 1356
+"    - tags: 
 "    - energy: 
 "    - pain: 
 "    - mood: 
 "    - sleep: 
-"    - tags: 
 
 set syntax=lft
 
