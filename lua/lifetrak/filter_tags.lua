@@ -1,5 +1,7 @@
 local M = {}
 
+local utils = require('lifetrak.utils')
+
 
 function M.choose_tag()
     local tags = M._get_tags()
@@ -19,7 +21,7 @@ end
 function M._filter_by_tag(tag)
     local chosen_tags = {}
 
-    for k, v in pairs(M._get_whole_buffer()) do
+    for k, v in pairs(utils.get_whole_buffer()) do
         if (string.match(v, '- tags:') and string.match(v, tag)) then
             table.insert(chosen_tags, {k, v})
         end
@@ -95,7 +97,7 @@ end
 function M._get_tags()
     local all_tags = {}
 
-    for _, v in pairs(M._get_whole_buffer()) do
+    for _, v in pairs(utils.get_whole_buffer()) do
         if (string.match(v, '- tags:') and string.len(v) > 8) then
             -- remove the '- tags: ' prefix
             local tag = string.sub(v, 9)
@@ -114,11 +116,6 @@ function M._get_tags()
 
     table.sort(all_tags)
     return all_tags
-end
-
-
-function M._get_whole_buffer()
-    return vim.api.nvim_buf_get_lines(0, 0, -1, {})
 end
 
 

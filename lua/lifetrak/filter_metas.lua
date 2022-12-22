@@ -2,27 +2,42 @@ local M = {}
 
 local utils = require('lifetrak.utils')
 
+
 function M.choose_meta()
     local metas = utils.get_metas()
-    print(vim.inspect(metas))
+    local metas_list = ''
 
-    -- for _, v in pairs(utils.get_metas()) do
-    --     table.insert(header, v)
-    -- end
-    -- local cache_config = lifetrak._get_disk_config()
-    -- u.p(cache_config)
+    for k, v in pairs(metas) do
+        metas_list = metas_list .. k .. ': ' .. v .. "\n"
+    end
 
-    -- local tags = M._get_tags()
-    -- local tags_list = ''
+    local meta_prompt = "Choose a meta: \n" .. metas_list .. ': '
+    vim.ui.input({ prompt = meta_prompt }, function(input)
+        local chosen_meta = input
 
-    -- for k, v in pairs(tags) do
-    --     tags_list = tags_list .. k .. ': ' .. v .. "\n"
-    -- end
+        vim.ui.input({ prompt = "What value? " }, function(val)
+            local search_val = val
+            M._filter_by_meta(metas[tonumber(chosen_meta)], search_val)
+        end)
+    end)
+end
 
-    -- local tag_prompts = "Choose a tag: \n" .. tags_list .. ': '
-    -- vim.ui.input({ prompt = tag_prompts }, function(input)
-    --     M._filter_by_tag(tags[tonumber(input)])
-    -- end)
+
+function M._filter_by_meta(meta, val)
+    local search_string = '- ' .. meta ..': ' .. val
+    local entry = {}
+
+    for _, v in pairs(utils.get_whole_buffer()) do
+        if (string.match(v, search_string)) then
+            table.insert(entry, M._get_entry())
+        end
+    end
+
+    -- M._build_output(chosen_tags)
+end
+
+
+function M._get_entry(entry_line_no)
 end
 
 

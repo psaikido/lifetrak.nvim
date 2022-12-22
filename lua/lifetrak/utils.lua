@@ -2,6 +2,7 @@ local M = {}
 
 local Path = require('plenary.path')
 
+
 function M.get_metas()
     local metas = {}
     local cache_config = M.get_disk_config()
@@ -35,6 +36,11 @@ end
 function M.reload()
     require('plenary.reload').reload_module("lifetrak")
     vim.notify("Lifetrak modules reloaded!", vim.log.levels.INFO)
+end
+
+
+function M.get_whole_buffer()
+    return vim.api.nvim_buf_get_lines(0, 0, -1, {})
 end
 
 

@@ -124,7 +124,7 @@ function M._make_header()
     table.insert(header, '- tags: ')
 
     -- add the 'meta' categories
-    for _, v in pairs(M.get_formatted_metas()) do
+    for _, v in pairs(M._get_formatted_metas()) do
         table.insert(header, v)
     end
 
@@ -132,7 +132,7 @@ function M._make_header()
 end
 
 
-function M.get_formatted_metas()
+function M._get_formatted_metas()
     local formatted_metas = {}
     local metas = utils.get_metas()
 
