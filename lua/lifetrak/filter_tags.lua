@@ -39,7 +39,7 @@ function M._build_output(tags)
         table.insert(entries, entry)
     end
 
-    M._output(entries)
+    utils.output(entries)
 end
 
 
@@ -47,7 +47,7 @@ function M._get_entry(entry_line_no)
     local entry = {}
     -- we have a line number of the tag being searched
     -- it's 3 below the starting '---'
-    -- we go up 4 because we want to 1 above when we start
+    -- we go up 4 because we want to go 1 above when we start
     local line_no_top = entry_line_no - 4
 
     -- go through each line looking for the next entry start ie. '---'
@@ -72,25 +72,6 @@ function M._get_entry(entry_line_no)
     end
 
     return entry
-end
-
-
-function M._output(entries)
-    vim.api.nvim_command('tabnew')
-    buf = vim.api.nvim_get_current_buf()
-    vim.api.nvim_buf_set_name(buf, 'Journal filter #' .. buf)
-    vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
-    vim.api.nvim_buf_set_option(buf, 'swapfile', false)
-    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
-    vim.api.nvim_buf_set_option(buf, 'filetype', 'lft')
-
-    local count = 0
-    for _, v in pairs(entries) do
-        for _, y in pairs(v) do
-            vim.api.nvim_buf_set_lines(buf, count, count, false, y)
-            count = count + 1
-        end
-    end
 end
 
 

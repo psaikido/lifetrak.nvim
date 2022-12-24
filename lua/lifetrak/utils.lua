@@ -44,4 +44,23 @@ function M.get_whole_buffer()
 end
 
 
+function M.output(entries)
+    vim.api.nvim_command('tabnew')
+    buf = vim.api.nvim_get_current_buf()
+    vim.api.nvim_buf_set_name(buf, 'Journal filter #' .. buf)
+    vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
+    vim.api.nvim_buf_set_option(buf, 'swapfile', false)
+    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
+    vim.api.nvim_buf_set_option(buf, 'filetype', 'lft')
+
+    local count = 0
+    for _, v in pairs(entries) do
+        for _, y in pairs(v) do
+            vim.api.nvim_buf_set_lines(buf, count, count, false, y)
+            count = count + 1
+        end
+    end
+end
+
+
 return M
