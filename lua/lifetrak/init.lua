@@ -1,6 +1,8 @@
 local M = {}
 
 local utils = require('lifetrak.utils')
+local filter_tags = require('lifetrak.filter_tags')
+local filter_metas = require('lifetrak.filter_metas')
 local Path = require('plenary.path')
 local config = {}
 
@@ -11,19 +13,31 @@ function M.init(opts)
   M._create_user_commands()
 end
 
+
+function M._refresh()
+  local cache_config = utils.get_json_file_name()
+  Path:new(cache_config):write(vim.fn.json_encode(config), "w")
+end
+
+
 function M._create_user_commands()
   vim.api.nvim_create_user_command(
     'Lifetrak',
     function()
-      lifetrak.open_current()
+      M.open_current()
     end,
     {nargs = 0, desc = 'Open current journal'}
   )
 
+  -- Give the following commands if the buffer is an ".lft" filetype
+  if vim.bo.filetype ~= 'lft' then
+    return
+  end
+
   vim.api.nvim_create_user_command(
     'LifetrakChangeCurrent',
     function()
-      lifetrak.change_current()
+      M.change_current()
     end,
     {nargs = 0, desc = 'Change current journal'}
   )
@@ -31,7 +45,7 @@ function M._create_user_commands()
   vim.api.nvim_create_user_command(
     'LifetrakEntry',
     function()
-      lifetrak.journal_entry()
+      M.journal_entry()
     end,
     {nargs = 0, desc = 'New journal entry'}
   )
@@ -51,20 +65,6 @@ function M._create_user_commands()
     end,
     {nargs = 0, desc = 'Filter by tag'}
   )
-
-  vim.api.nvim_create_user_command(
-    'LifetrakReload',
-    function()
-      utils.reload()
-    end,
-    {nargs = 0, desc = 'Reload'}
-  )
-end
-
-
-function M._refresh()
-  local cache_config = utils.get_json_file_name()
-  Path:new(cache_config):write(vim.fn.json_encode(config), "w")
 end
 
 
